@@ -51,10 +51,12 @@ function renderAudit(){const a=data.directoryAudit;if(!a)return;const general=da
  $('coverageSummary').textContent=`공식 목록 대조 · 시 ${a.counts['시']} / 군 ${a.counts['군']} / 자치구 ${a.counts['구']} / 광역 ${a.counts['광역']}`+(general?` · 일반구 ${general} 추가`:'');
  $('coverageNote').textContent=`${a.checked} 행정안전부 지자체 누리집 ${a.officialCount}개와 대조: 누락 ${a.missing.length}개, 중복 ${a.duplicateIds.length}개. 제주시·서귀포시 포함. 목록 확인과 이미지 확보는 별개입니다.`;
  const table=el('table');const head=el('tr');['지역','등록','CI 제공','슬로건 제공'].forEach(t=>head.append(el('th','',t)));table.append(head);
- for(const region of [...new Set(data.items.filter(r=>r.kind!=='관공서').map(r=>r.region))].sort()){
-  const rows=data.items.filter(r=>r.region===region),tr=el('tr');[region,rows.length,rows.filter(r=>r.assets.some(a=>a.assetType==='ci')).length,rows.filter(r=>r.assets.some(a=>a.assetType==='slogan'&&a.versionStatus!=='historical')).length].forEach(v=>tr.append(el('td','',v)));table.append(tr);
+ const municipalities=data.items.filter(r=>['광역자치단체','시·군·구','일반구'].includes(r.kind));
+ for(const region of [...new Set(municipalities.map(r=>r.region))].sort()){
+  const rows=municipalities.filter(r=>r.region===region),tr=el('tr');[region,rows.length,rows.filter(r=>r.assets.some(a=>a.assetType==='ci')).length,rows.filter(r=>r.assets.some(a=>a.assetType==='slogan'&&a.versionStatus!=='historical')).length].forEach(v=>tr.append(el('td','',v)));table.append(tr);
  }$('coverageTable').replaceChildren(table);
 }
+for(const category of ['문화재단','문화예술기관']){const button=el('button','',category);button.dataset.kind=category;$('categories').append(button);}
 $('searchForm').onsubmit=e=>{e.preventDefault();render();};$('search').oninput=()=>{if(data)render();};
 for(const id of ['region','ready','history','assetFilter'])$(id).onchange=()=>render();
 $('reset').onclick=reset;$('emptyReset').onclick=reset;
