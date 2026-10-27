@@ -36,14 +36,14 @@ function updateAsset(){
  $('sourcePage').href=a?.page||current.home;$('checked').textContent=`자료 확인 ${current.checked} · 공식 출처와 사용 지침 확인`;
  if(!a){$('missingAsset').textContent=`${typeName(selectedType)} PNG를 아직 확보하지 못했습니다. 자료가 없거나 미제정됐다는 뜻은 아닙니다. 공식 누리집에서 확인해 주세요.`;$('download').removeAttribute('href');return;}
  $('detailImage').src=a.file;$('detailImage').alt=current.name+' '+typeName(selectedType)+' '+a.label;
- if(a.previewDark&&$('preview').classList.contains('checker'))setBackground('dark');
+ if(a.previewDark&&!$('preview').classList.contains('dark'))setBackground('dark');
  $('dimensions').textContent=`${a.width} × ${a.height}px`;
- $('assetNote').textContent=(a.versionStatus==='historical'?'과거 자료입니다. ':'공식 누리집 게시 자료입니다. ')+(a.label?a.label+' · ':'')+a.method;
- $('sourceImage').href=a.source;$('variants').replaceChildren();
- list.forEach((x,i)=>{const b=el('button',i===assetIndex?'selected':'',typeName(selectedType)+' '+(i+1)+(x.versionStatus==='historical'?' · 과거':''));b.title=x.label;b.onclick=()=>{assetIndex=i;updateAsset();};$('variants').append(b);});
+ $('assetNote').textContent=(a.versionStatus==='historical'?'과거 자료입니다. ':a.isGuide?'공식 배포본의 BI 사용 예시입니다. ':'공식 누리집 게시 자료입니다. ')+(a.label?a.label+' · ':'')+a.method;
+ $('sourceImage').href=a.source;$('sourceImage').textContent=a.archiveEntry?'원본 배포 ZIP ↗':'원본 이미지 ↗';$('variants').replaceChildren();
+ list.forEach((x,i)=>{const b=el('button',i===assetIndex?'selected':'',x.variantLabel||typeName(selectedType)+' '+(i+1)+(x.versionStatus==='historical'?' · 과거':''));b.title=x.label;b.onclick=()=>{assetIndex=i;updateAsset();};$('variants').append(b);});
  $('variants').hidden=list.length<2;updateDownload();
 }
-function updateDownload(){const a=assets(current,selectedType)[assetIndex];if(!a)return;$('download').href='./downloads/'+a.id+'/'+$('size').value+'.png';$('download').download=current.region+'_'+current.name+'_'+typeName(selectedType)+'_'+a.id+'_투명.png';$('download').textContent=typeName(selectedType)+' 투명 PNG 다운로드 ↓';}
+function updateDownload(){const a=assets(current,selectedType)[assetIndex];if(!a)return;$('download').href='./downloads/'+a.id+'/'+$('size').value+'.png';$('download').download=current.region+'_'+current.name+'_'+typeName(selectedType)+'_'+a.id+(a.backgroundOpaque?'_배경포함.png':'_투명.png');$('download').textContent=(a.backgroundOpaque?'배경 포함 ':typeName(selectedType)+' 투명 ')+'PNG 다운로드 ↓';}
 function openDetail(row,type='ci'){current=row;selectedType=type;assetIndex=0;$('detailName').textContent=row.name;$('detailRegion').textContent=row.region+(row.parent?' · '+row.parent:'')+' · '+row.kind;$('size').value='original';setBackground('checker');updateAsset();$('detail').showModal();}
 function setBackground(bg){$('preview').className='preview '+bg;document.querySelectorAll('[data-bg]').forEach(b=>b.classList.toggle('selected',b.dataset.bg===bg));}
 function reset(){kind='';$('search').value='';$('region').value='';$('assetFilter').value='';$('ready').checked=false;$('history').checked=false;document.querySelectorAll('[data-kind]').forEach(b=>b.classList.toggle('active',b.dataset.kind===''));render();}
